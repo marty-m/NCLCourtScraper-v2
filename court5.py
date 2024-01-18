@@ -3,6 +3,7 @@ import os
 import datetime
 import booking
 import re
+from helper import send_message
 from startAlertServer import addBooking
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
@@ -10,9 +11,9 @@ from playwright.sync_api import sync_playwright
 def court5():
     load_dotenv()
 
-    NCL_EMAIL = os.getenv('NCL_EMAIL')
-    NCL_PASSWORD = os.getenv('NCL_PASSWORD')
 
+    NCL_EMAIL = os.getenv("NCL_EMAIL")
+    NCL_PASSWORD = os.getenv("NCL_PASSWORD")
 
 
     with sync_playwright() as p:
@@ -22,12 +23,50 @@ def court5():
         context.add_cookies(cookie.cookie)
 
         page.goto('https://sportsbookings.ncl.ac.uk/Connect/memberHomePage.aspx')
-        if page.url == 'https://appspay.ncl.ac.uk/sport/Login/Index?ReturnUrl=%2fsport%2fbooking':
-            # Implement Twilio SMS alert to inform of cookie expiry with outlook verification number asking for approval
-            
 
         page.wait_for_selector('#form_1')
         page.locator('//*[@id="form_1"]/div[1]/div/a').click()
+
+        while page.url == 'https://appspay.ncl.ac.uk/sport/Login/Index?ReturnUrl=%2fsport%2fbooking':
+            # Implement Twilio SMS alert to inform of cookie expiry with outlook verification number asking for approval
+            page.wait_for_selector('#Authenticate')
+            page.locator('//*[@id="Authenticate"]/fieldset/div[1]/div[2]/a').click()
+            
+            page.wait_for_timeout(3000)
+            if page.url == 'https://sportsbookings.ncl.ac.uk/Connect/memberHomePage.aspx':
+                break
+
+            page.wait_for_selector('#i0116')
+            page.fill('#i0116', NCL_EMAIL)
+            page.click('#idSIButton9')
+
+            page.wait_for_selector('#i0118')
+            page.fill('#i0118', NCL_PASSWORD)
+            page.click('#idSIButton9')
+            
+            while page.url != 'https://sportsbookings.ncl.ac.uk/Connect/memberHomePage.aspx':
+                page.wait_for_selector('#idChkBx_SAOTCAS_TD')
+                page.check('#idChkBx_SAOTCAS_TD')
+                approval = page.locator('//*[@id="idRichContext_DisplaySign"]').text_content()
+                
+                #send_message(os.getenv("RECEIVING_NUMBER"), f"Code: {approval}\n\nThe court scraper cookie has expired. Please approve the login request on your phone.")
+                
+                while page.is_visible('#idRichContext_DisplaySign'):
+                    page.wait_for_timeout(1000)
+                
+                page.wait_for_timeout(4000)
+                if page.is_visible('//*[@id="idA_SAASDS_Resend"]'):
+                    
+                    while datetime.datetime.now().hour > 23 or datetime.datetime.now().hour < 8:
+                        page.wait_for_timeout(600000)
+
+                    page.click('//*[@id="idBtn_SAASDS_Cancel"]')
+                    page.wait_for_selector('//*[@id="tilesHolder"]/div[1]/div/div[1]')
+                    page.click('//*[@id="tilesHolder"]/div[1]/div/div[1]')
+                    continue
+                
+                page.click('#idSIButton9')
+                page.wait_for_timeout(3000)
         
 
         page.wait_for_selector('#ctl00_ctl11_Li1')
