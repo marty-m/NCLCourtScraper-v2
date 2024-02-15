@@ -1,22 +1,25 @@
+import time
 import booking
 import datetime
+import court5
+import court8
+from helper import store_booking, send_court_alert
 
-availableBookings: booking.Booking = []
 
-def addBooking(booking: booking.Booking):
-    for i in availableBookings:
-        if i.dateTime == booking.dateTime and i.courtNr == booking.courtNr:
-            return
-    availableBookings.append(booking)
-    print(availableBookings)
+
 
 # TODO:
-# - Twilio SMS alert to inform of cookie expiry with outlook verification number asking for approval
-# - Twilio SMS alert to inform of new available booking 
-# - Remote service pause and resume through Twilio SMS
+# - Remote service pause and resume
 def main():
-    availableBookings.append(booking.Booking(0, datetime.datetime(2021, 10, 10, 10, 10), True))
+    store_booking(booking.Booking(0, datetime.datetime(2021, 10, 10, 10, 10), True))
     while True:
-        return
-    
-
+        print(f"---------{datetime.datetime.now}---------")
+        print("Starting alert service...")
+        print("Searching available slots for Court 5...")
+        court5.court5()
+        print("Searching available slots for Court 8...")
+        court8.court8()
+        print("Sending court alert... (if any new bookings are available)")
+        send_court_alert()
+        print("Waiting for 2 hours...")
+        time.sleep(7200)
