@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from chump import Application
 import json
 import booking
+import jsonpickle
 
 
 load_dotenv()
@@ -35,6 +36,7 @@ def send_court_alert():
     if message != "New bookings available:\n":
         send_message(title, message)
 
+
 def get_stored_cookie():
     if os.path.exists('cookie.json'):
         with open('cookie.json', 'r') as file:
@@ -49,7 +51,8 @@ def dump_cookie(cookie):
 def get_stored_bookings():
     if os.path.exists('bookings.json'):
         with open('bookings.json', 'r') as file:
-            bookings = json.load(file)
+            json_bookings = json.load(file)
+        bookings = jsonpickle.decode(json_bookings)
     return bookings
 
 def store_booking(booking: booking.Booking):
@@ -59,8 +62,12 @@ def store_booking(booking: booking.Booking):
             return
     availableBookings.append(booking)
     with open('bookings.json', 'w') as file:
-        json.dump(availableBookings, file)
+        json_bookings = jsonpickle.encode(availableBookings)
+        json.dump(json_bookings, file)
 
 def commit_booking_list(bookingList):
     with open('bookings.json', 'w') as file:
-        json.dump(bookingList, file)
+        json_bookings = jsonpickle.encode(bookingList)
+        json.dump(json_bookings, file)
+
+
