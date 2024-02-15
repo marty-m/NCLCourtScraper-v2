@@ -1,3 +1,5 @@
 .env
 cookie.py
 __pycache__/
+bookings.json
+cookie.json
