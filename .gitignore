@@ -4,3 +4,4 @@ __pycache__/
 bookings.json
 cookie.json
 Dockerfile
+ms-playwright
