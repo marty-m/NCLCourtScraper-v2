@@ -12,6 +12,7 @@ load_dotenv()
 PUSHOVER_APP_TOKEN= os.getenv("PUSHOVER_APP_TOKEN")
 PUSHOVER_USER_TOKEN = os.getenv("PUSHOVER_USER_TOKEN")
 
+#Pushover helpers
 def send_message(title, message, priority=0):
     app = Application(PUSHOVER_APP_TOKEN)
     user = app.get_user(PUSHOVER_USER_TOKEN)
@@ -37,6 +38,7 @@ def send_court_alert():
         send_message(title, message)
 
 
+#Cookie storage helpers
 def get_stored_cookie():
     if os.path.exists('cookie.json'):
         with open('cookie.json', 'r') as file:
@@ -48,6 +50,8 @@ def dump_cookie(cookie):
         json.dump(cookie, file)
 
 
+
+#Booking storage helpers
 def get_stored_bookings():
     if os.path.exists('bookings.json'):
         with open('bookings.json', 'r') as file:
