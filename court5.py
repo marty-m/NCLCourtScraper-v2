@@ -16,7 +16,7 @@ def court5():
 
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context()
         page = context.new_page()
         context.add_cookies(get_stored_cookie())
@@ -64,9 +64,11 @@ def court5():
                     page.wait_for_selector('//*[@id="tilesHolder"]/div[1]/div/div[1]')
                     page.click('//*[@id="tilesHolder"]/div[1]/div/div[1]')
                     continue
+                if page.is_visible('#idSIButton9'):
+                    page.click('#idSIButton9')
                 
-                page.click('#idSIButton9')
                 page.wait_for_timeout(10000)
+                
         dump_cookie(context.cookies())
 
         page.wait_for_selector('#ctl00_ctl11_Li1')
@@ -78,12 +80,13 @@ def court5():
         page.wait_for_selector('#ctl00_MainContent_activitiesGrid_ctrl1_lnkListCommand')
         page.locator('//*[@id="ctl00_MainContent_activitiesGrid_ctrl1_lnkListCommand"]').click()
 
-        for i in range(2):
-            availableOnPage = page.evaluate("document.getElementsByClassName('itemofcurrentuser').length")
+        for i in range(3):
+            page.wait_for_timeout(1500)
+            availableOnPage = page.evaluate("document.getElementsByClassName('itemavailable').length")
             
             if availableOnPage != 0:
                 for j in range(availableOnPage):
-                    rawCell = page.evaluate(f"document.getElementsByClassName('itemofcurrentuser')[{j}].querySelector('span > input').getAttribute('data-qa-id')")
+                    rawCell = page.evaluate(f"document.getElementsByClassName('itemavailable')[{j}].querySelector('span > input').getAttribute('data-qa-id')")
                     date = re.search('(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|[1][0-2])/[0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,3})?', rawCell).group(0)
                     store_booking(booking.Booking(5, datetime.datetime.strptime(date, "%d/%m/%Y %H:%M:%S")))
             
